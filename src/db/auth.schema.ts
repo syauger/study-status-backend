@@ -1,12 +1,5 @@
-import {
-  index,
-  int,
-  integer,
-  real,
-  sqliteTable,
-  text,
-} from "drizzle-orm/sqlite-core";
 import { relations, sql } from "drizzle-orm";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -112,37 +105,3 @@ export const accountRelations = relations(account, ({ one }) => ({
     references: [user.id],
   }),
 }));
-export const locations = sqliteTable("locations", {
-  id: int().primaryKey({ autoIncrement: true }),
-  name: text().notNull(),
-
-  latitude: real().notNull(),
-  longitude: real().notNull(),
-
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
-
-export const reports = sqliteTable("checkins", {
-  id: integer().primaryKey({ autoIncrement: true }),
-
-  locationId: integer("location_id")
-    .notNull()
-    .references(() => locations.id, {
-      onDelete: "cascade",
-    }),
-
-  crowdLevel: text("crowd_level", {
-    enum: ["empty", "moderate", "busy"],
-  }).notNull(),
-
-  alias: text(),
-  comment: text(),
-
-  createdAt: integer("created_at", {
-    mode: "timestamp",
-  })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
