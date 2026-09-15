@@ -1,14 +1,12 @@
 import { OpenAPIRoute } from "chanfana";
-import { z } from "zod";
-import { type AppContext } from "../../lib/types";
-import { report } from "@/db/app.schema";
-import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/d1";
+import { z } from "zod";
+import { report } from "@/db/app.schema";
+import type { AppContext } from "../../lib/types";
 
 export class ReportGet extends OpenAPIRoute {
   schema = {
-    tags: ["Reports"],
-    summary: "Get a report",
     request: {
       params: z.object({
         reportId: z.number().describe("Report ID"),
@@ -16,20 +14,22 @@ export class ReportGet extends OpenAPIRoute {
     },
     responses: {
       "200": {
-        description: "Returns a list of reports",
         content: {
           "application/json": {
             schema: z.object({
-              success: z.boolean(),
               report: z.object(report.$inferSelect).nullable(),
+              success: z.boolean(),
             }),
           },
         },
+        description: "Returns a list of reports",
       },
       "404": {
         description: "Report not found",
       },
     },
+    summary: "Get a report",
+    tags: ["Reports"],
   };
 
   async handle(c: AppContext) {
@@ -46,8 +46,8 @@ export class ReportGet extends OpenAPIRoute {
       .catch(() => null);
 
     return {
-      success: res !== null,
       report: res?.[0] ?? null,
+      success: res !== null,
     };
   }
 }

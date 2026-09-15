@@ -3,12 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "cf-typegen": "wrangler types",
+    "check": "ultracite check",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "start": "wrangler dev",
-    "cf-typegen": "wrangler types",
+    "fix": "ultracite fix",
     "migrate:dev": "drizzle-kit generate && wrangler d1 migrations apply DB --local",
-    "migrate:prod": "drizzle-kit generate && wrangler d1 migrations apply DB --remote"
+    "migrate:prod": "drizzle-kit generate && wrangler d1 migrations apply DB --remote",
+    "start": "wrangler dev"
   },
   "dependencies": {
     "better-auth": "^1.7.5",
@@ -19,9 +21,11 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.12",
     "@types/node": "^25.9.6",
     "drizzle-kit": "^0.31.10",
     "tsx": "^4.23.13",
+    "ultracite": "^7.12.0",
     "wrangler": "^4.131.2"
   },
   "allowScripts": {

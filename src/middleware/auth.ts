@@ -1,6 +1,6 @@
-import { auth } from "@/lib/auth";
-import { AppVariables } from "@/lib/types";
 import { createMiddleware } from "hono/factory";
+import { auth } from "@/lib/auth";
+import type { AppVariables } from "@/lib/types";
 
 export const authMiddleware = createMiddleware<{
   Bindings: Cloudflare.Env;

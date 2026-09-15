@@ -1,36 +1,36 @@
 import { OpenAPIRoute } from "chanfana";
-import { z } from "zod";
-import { type AppContext } from "../../lib/types";
-import { report } from "@/db/app.schema";
-import { drizzle } from "drizzle-orm/d1";
 import { inArray } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/d1";
+import { z } from "zod";
+import { report } from "@/db/app.schema";
+import type { AppContext } from "../../lib/types";
 
 export class ReportCreate extends OpenAPIRoute {
   schema = {
-    tags: ["Reports"],
-    summary: "List Reports",
     request: {
       query: z.object({
-        page: z.number().default(0).describe("Page number"),
         locationIds: z
           .array(z.number())
           .optional()
           .describe("Filter by location IDs"),
+        page: z.number().default(0).describe("Page number"),
       }),
     },
     responses: {
       "200": {
-        description: "Returns a list of reports",
         content: {
           "application/json": {
             schema: z.object({
-              success: z.boolean(),
               reports: z.object(report.$inferSelect).array(),
+              success: z.boolean(),
             }),
           },
         },
+        description: "Returns a list of reports",
       },
     },
+    summary: "List Reports",
+    tags: ["Reports"],
   };
 
   async handle(c: AppContext) {
@@ -45,15 +45,15 @@ export class ReportCreate extends OpenAPIRoute {
       .where(
         locationIds?.length
           ? inArray(report.locationId, locationIds)
-          : undefined,
+          : undefined
       )
       .limit(10)
       .offset(page * 10)
       .catch(() => null);
 
     return {
-      success: res !== null,
       reports: res ?? [],
+      success: res !== null,
     };
   }
 }
