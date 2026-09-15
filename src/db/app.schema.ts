@@ -14,7 +14,6 @@ export const location = sqliteTable("locations", {
 });
 
 export const report = sqliteTable("checkins", {
-  alias: text(),
   comment: text(),
   createdAt: integer("created_at", {
     mode: "timestamp",

@@ -1,5 +1,4 @@
 import { OpenAPIRoute } from "chanfana";
-import { inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
 
@@ -10,25 +9,29 @@ import type { AppContext } from "../../lib/types";
 export class ReportCreate extends OpenAPIRoute {
   schema = {
     request: {
-      query: z.object({
-        locationIds: z
-          .array(z.number())
-          .optional()
-          .describe("Filter by location IDs"),
-        page: z.number().default(0).describe("Page number"),
-      }),
+      body: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              comment: z.string().optional(),
+              crowdLevel: z.enum(["empty", "moderate", "busy"]),
+              locationId: z.number().int().positive(),
+            }),
+          },
+        },
+      },
     },
     responses: {
       "200": {
         content: {
           "application/json": {
             schema: z.object({
-              reports: z.object(report.$inferSelect).array(),
+              report: z.object(report.$inferSelect).array(),
               success: z.boolean(),
             }),
           },
         },
-        description: "Returns a list of reports",
+        description: "Returns the created report",
       },
     },
     summary: "List Reports",
@@ -38,23 +41,24 @@ export class ReportCreate extends OpenAPIRoute {
   async handle(c: AppContext) {
     const db = drizzle(c.env.DB);
 
-    const data = await this.getValidatedData<typeof this.schema>();
-    const { page, locationIds } = data.query;
+    const { body } = await this.getValidatedData<typeof this.schema>();
+    // oxlint-disable-next-line typescript/no-non-null-assertion
+    const user = c.var.user!;
 
     const res = await db
-      .select()
-      .from(report)
-      .where(
-        locationIds?.length
-          ? inArray(report.locationId, locationIds)
-          : undefined
-      )
-      .limit(10)
-      .offset(page * 10)
+      .insert(report)
+      .values({
+        comment: body.comment ?? null,
+        createdBy: user.id,
+        crowdLevel: body.crowdLevel,
+        locationId: body.locationId,
+      })
+      .returning()
+      .then((r) => r[0])
       .catch(() => null);
 
     return {
-      reports: res ?? [],
+      report: res,
       success: res !== null,
     };
   }
