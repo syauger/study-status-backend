@@ -4,20 +4,27 @@ import { TaskCreate } from "./endpoints/taskCreate";
 import { TaskDelete } from "./endpoints/taskDelete";
 import { TaskFetch } from "./endpoints/taskFetch";
 import { TaskList } from "./endpoints/taskList";
+import { auth } from "./lib/auth";
 
 // Start a Hono app
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{
+  Bindings: Cloudflare.Env;
+}>();
 
-// Setup OpenAPI registry
-const openapi = fromHono(app, {
-	docs_url: "/",
-});
+app.all("/api/auth/*", (c) => auth(c.env).handler(c.req.raw));
 
-// Register OpenAPI endpoints
-openapi.get("/api/tasks", TaskList);
-openapi.post("/api/tasks", TaskCreate);
-openapi.get("/api/tasks/:taskSlug", TaskFetch);
-openapi.delete("/api/tasks/:taskSlug", TaskDelete);
+app.get("/api/test", (c) => c.text("Hello from Hono!"));
+
+// // Setup OpenAPI registry
+// const openapi = fromHono(app, {
+//   docs_url: "/",
+// });
+//
+// // Register OpenAPI endpoints
+// openapi.get("/api/tasks", TaskList);
+// openapi.post("/api/tasks", TaskCreate);
+// openapi.get("/api/tasks/:taskSlug", TaskFetch);
+// openapi.delete("/api/tasks/:taskSlug", TaskDelete);
 
 // You may also register routes for non OpenAPI directly on Hono
 // app.get('/test', (c) => c.text('Hono!'))

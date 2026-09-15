@@ -6,15 +6,29 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "start": "wrangler dev",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "migrate:dev": "drizzle-kit generate && wrangler d1 migrations apply DB --local",
+    "migrate:prod": "drizzle-kit generate && wrangler d1 migrations apply DB --remote"
   },
   "dependencies": {
+    "better-auth": "^1.7.5",
     "chanfana": "^3.3.0",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
     "hono": "^4.12.12",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.9.6",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.23.13",
     "wrangler": "^4.131.2"
+  },
+  "allowScripts": {
+    "esbuild@0.18.20": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.1": true,
+    "fsevents@2.3.3": true,
+    "workerd@1.20260911.1": true
   }
 }
