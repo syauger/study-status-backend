@@ -1,0 +1,1 @@
+ALTER TABLE `checkins` ADD `created_by` text NOT NULL REFERENCES user(id);
