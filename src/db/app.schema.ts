@@ -7,7 +7,6 @@ export const location = sqliteTable("locations", {
     .notNull()
     .$defaultFn(() => new Date()),
   id: int().primaryKey({ autoIncrement: true }),
-
   latitude: real().notNull(),
   longitude: real().notNull(),
   name: text().notNull(),
@@ -21,16 +20,13 @@ export const report = sqliteTable("checkins", {
   })
     .notNull()
     .$defaultFn(() => new Date()),
-
   createdBy: text("created_by")
     .notNull()
     .references(() => user.id),
-
   crowdLevel: text("crowd_level", {
     enum: ["empty", "moderate", "busy"],
   }).notNull(),
   id: integer().primaryKey({ autoIncrement: true }),
-
   locationId: integer("location_id")
     .notNull()
     .references(() => location.id, {
