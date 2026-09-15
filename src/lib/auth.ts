@@ -1,6 +1,7 @@
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { betterAuth } from "better-auth/minimal";
 import { drizzle } from "drizzle-orm/d1";
+
 import * as appSchema from "@/db/app.schema";
 import * as authSchema from "@/db/auth.schema";
 

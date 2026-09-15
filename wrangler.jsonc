@@ -5,7 +5,7 @@
   "compatibility_date": "2026-09-11",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
   "upload_source_maps": true,
   "d1_databases": [
@@ -13,13 +13,13 @@
       "binding": "DB",
       "database_name": "prod-study-status",
       "database_id": "f5dfa152-5866-4775-9665-04727b6e4225",
-      "migrations_dir": "drizzle"
-    }
+      "migrations_dir": "drizzle",
+    },
   ],
   "r2_buckets": [
     {
       "bucket_name": "study-status",
-      "binding": "R2"
-    }
-  ]
+      "binding": "R2",
+    },
+  ],
 }

@@ -1,6 +1,6 @@
 import type { sessionSchema } from "better-auth";
 import type { Context } from "hono";
-import z from "zod";
+import { z } from "zod";
 
 export const AuthUserSchema = z.object({
   createdAt: z.date(),

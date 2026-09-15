@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import { int, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+
 import { user } from "@/db/auth.schema";
 
 export const location = sqliteTable("locations", {

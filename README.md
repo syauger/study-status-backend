@@ -2,8 +2,7 @@
 
 This is a Cloudflare Worker with OpenAPI 3.1 using [chanfana](https://github.com/cloudflare/chanfana) and [Hono](https://github.com/honojs/hono).
 
-This is an example project made to be used as a quick start into building OpenAPI compliant Workers that generates the
-`openapi.json` schema automatically from code and validates the incoming request to the defined parameters or request body.
+This is an example project made to be used as a quick start into building OpenAPI compliant Workers that generates the `openapi.json` schema automatically from code and validates the incoming request to the defined parameters or request body.
 
 ## Get started
 

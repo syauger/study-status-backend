@@ -1,4 +1,5 @@
 import { createMiddleware } from "hono/factory";
+
 import { auth } from "@/lib/auth";
 import type { AppVariables } from "@/lib/types";
 
