@@ -1,18 +1,13 @@
 import { OpenAPIRoute } from "chanfana";
-import { inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
-import { report } from "@/db/app.schema";
+import { location } from "@/db/app.schema";
 import type { AppContext } from "../../lib/types";
 
-export class ReportList extends OpenAPIRoute {
+export class LocationList extends OpenAPIRoute {
   schema = {
     request: {
       query: z.object({
-        locationIds: z
-          .array(z.number())
-          .optional()
-          .describe("Filter by location IDs"),
         page: z.number().default(0).describe("Page number"),
       }),
     },
@@ -21,38 +16,33 @@ export class ReportList extends OpenAPIRoute {
         content: {
           "application/json": {
             schema: z.object({
-              reports: z.object(report.$inferSelect).array(),
+              locations: z.object(location.$inferSelect).array(),
               success: z.boolean(),
             }),
           },
         },
-        description: "Returns a list of reports",
+        description: "Returns a list of locations",
       },
     },
-    summary: "List Reports",
-    tags: ["Reports"],
+    summary: "List Locations",
+    tags: ["Locations"],
   };
 
   async handle(c: AppContext) {
     const db = drizzle(c.env.DB);
 
     const data = await this.getValidatedData<typeof this.schema>();
-    const { page, locationIds } = data.query;
+    const { page } = data.query;
 
     const res = await db
       .select()
-      .from(report)
-      .where(
-        locationIds?.length
-          ? inArray(report.locationId, locationIds)
-          : undefined
-      )
+      .from(location)
       .limit(10)
       .offset(page * 10)
       .catch(() => null);
 
     return {
-      reports: res ?? [],
+      locations: res ?? [],
       success: res !== null,
     };
   }
