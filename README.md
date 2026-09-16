@@ -1,27 +1,125 @@
-# Cloudflare Workers OpenAPI 3.1
+# StudyStatus API
 
-This is a Cloudflare Worker with OpenAPI 3.1 using [chanfana](https://github.com/cloudflare/chanfana) and [Hono](https://github.com/honojs/hono).
+StudyStatus's backend serves study locations, current weather, community reports, and email/password authentication. It uses Cloudflare Workers, Hono, Chanfana/OpenAPI, Drizzle, D1, and Better Auth. The Expo frontend lives in the companion `mobile` repo (see [its README](../mobile/README.md) when checked out alongside this repo).
 
-This is an example project made to be used as a quick start into building OpenAPI compliant Workers that generates the `openapi.json` schema automatically from code and validates the incoming request to the defined parameters or request body.
+## Run locally
 
-## Get started
+Use Node.js 22 LTS or newer and npm. Run the following commands from the API repo root. Local development uses Wrangler's local D1 database; Cloudflare login and deployment are not part of this setup.
 
-1. Sign up for [Cloudflare Workers](https://workers.dev). The free tier is more than enough for most use cases.
-2. Clone this project and install dependencies with `npm install`
-3. Run `wrangler login` to login to your Cloudflare account in wrangler
-4. Run `wrangler deploy` to publish the API to Cloudflare Workers
+### 1. Install dependencies
 
-## Project structure
+```sh
+npm ci
+```
 
-1. Your main router is defined in `src/index.ts`.
-2. Each endpoint has its own file in `src/endpoints/`.
-3. For more information read the [chanfana documentation](https://chanfana.pages.dev/) and [Hono documentation](https://hono.dev/docs).
+### 2. Configure authentication
 
-## Development
+Create `.dev.vars` in the API root with:
 
-1. Run `wrangler dev` to start a local instance of the API.
-2. Open `http://localhost:8787/` in your browser to see the Swagger interface where you can try the endpoints.
-3. Changes made in the `src/` folder will automatically trigger the server to reload, you only need to refresh the Swagger interface.
+```dotenv
+BETTER_AUTH_URL=http://localhost:8787
+BETTER_AUTH_SECRET=replace-with-a-generated-secret
+```
+
+Generate a random secret and paste the output in place of the placeholder:
+
+```sh
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+```
+
+Keep the secret stable between local runs. `.dev.vars` is ignored by Git. Wrangler also supports `.env`, but if `.dev.vars` exists it takes precedence and `.env` values are not loaded into the Worker. Keep all local Worker secrets in one file. See [Cloudflare's environment documentation](https://developers.cloudflare.com/workers/local-development/environment-variables/).
+
+`WEB_ORIGINS` is already configured in `wrangler.jsonc` for `localhost` and `127.0.0.1` on ports 8081 and 8088. To use another frontend origin, add an override to `.dev.vars`, retaining any origins you still use:
+
+```dotenv
+WEB_ORIGINS=http://localhost:8081,http://127.0.0.1:8081,http://localhost:8088,http://127.0.0.1:8088,http://192.168.1.100:8081
+```
+
+Replace the example LAN address with your computer's address. Origins include the scheme and port, with no path or trailing slash.
+
+### 3. Initialize and seed the local database
+
+```sh
+npm run migrate:dev
+npm run seed:dev
+```
+
+`migrate:dev` generates migrations from the Drizzle schema, then applies them locally. On an unchanged checkout it should find no schema changes to generate. `seed:dev` adds the five study locations described below. Rerun migrations after pulling schema changes and rerun the seed when seed data changes.
+
+Wrangler persists local data under `.wrangler/state`; this is separate from production. No D1 connection string or database credentials belong in `.dev.vars`. The `DB` binding is supplied by `wrangler.jsonc`. The configured `R2` binding is not currently used by the routes. See [D1 local development](https://developers.cloudflare.com/d1/best-practices/local-development/).
+
+### 4. Start the API
+
+```sh
+npm run dev
+```
+
+Open [the API documentation](http://localhost:8787/) and [the locations endpoint](http://localhost:8787/api/locations). The latter should return `success: true` and seeded locations. Keep this terminal running; Wrangler reloads source changes.
+
+For a phone or Android emulator, expose the server on your network instead:
+
+```sh
+npm start
+```
+
+This runs `wrangler dev --ip 0.0.0.0`. Set `BETTER_AUTH_URL` to the same reachable API URL you will use in the frontend, then restart Wrangler:
+
+| Client                                   | API URL                         |
+| ---------------------------------------- | ------------------------------- |
+| Browser on this computer / iOS simulator | `http://localhost:8787`         |
+| Android Studio emulator                  | `http://10.0.2.2:8787`          |
+| Physical phone                           | `http://<computer-LAN-IP>:8787` |
+
+For a phone, use the same network and allow incoming connections to port 8787. `0.0.0.0` is a listening address, not a client URL.
+
+### 5. Connect the frontend
+
+In the companion `mobile` repo, install dependencies with `bun install --frozen-lockfile`, copy `.env.example` to `.env.local`, and **edit** it to set:
+
+```dotenv
+EXPO_PUBLIC_API_URL=http://localhost:8787
+```
+
+Use the appropriate API URL from the table, without `/api` at the end. The checked-in frontend example currently contains a specific LAN address, so copying it alone is not sufficient. Start the frontend with `bun run web --port 8081` for desktop web, or follow the [mobile setup](../mobile/README.md) for native platforms. Restart Expo and reload the app after changing its environment file.
+
+Open a study location, register an account, and create a report to verify the complete flow. Browsing locations and reports does not require an account.
+
+## Troubleshooting
+
+- **No locations / database errors:** apply local migrations, then run `npm run seed:dev` from this repo. Ensure the server and migrations use the same persistence directory.
+- **Network request failed:** open `/api/locations` using the configured API URL on the client device. Check the hostname, firewall, API process, and port. A phone's `localhost` points to the phone.
+- **Sign-in or report creation fails:** check `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and the exact browser origin in `WEB_ORIGINS`. For desktop web, use `localhost` consistently for both frontend and API (or `127.0.0.1` consistently). Restart Wrangler after environment changes.
+- **Weather unavailable:** the API needs outbound internet access to Open-Meteo; this route requires no weather API key.
+
+## Project structure and checks
+
+- `src/index.ts`: routes, CORS, and OpenAPI documentation at `/`.
+- `src/endpoints/`: location, weather, and report handlers.
+- `src/db/` and `drizzle/`: database schemas and SQL migrations.
+- `src/lib/auth.ts`: runtime Better Auth configuration.
+- `scripts/seed-locations.sql`: study location seed data.
+- `tests/reports.integration.test.mjs`: local HTTP integration tests.
+
+```sh
+npm run check
+npm run cf-typegen
+```
+
+`check` runs Ultracite (Oxlint/Oxfmt). Run `cf-typegen` after changing Wrangler bindings. Integration test instructions are below.
+
+## Deploy to Cloudflare
+
+Deployment is separate from local setup. You need access to the Cloudflare account and the D1/R2 resources in `wrangler.jsonc`, or must replace them with your own resources. Configure the deployed `BETTER_AUTH_URL` and `WEB_ORIGINS` in Wrangler's `vars`, and provision a separate production secret:
+
+```sh
+npx wrangler login
+npx wrangler secret put BETTER_AUTH_SECRET
+npm run migrate:prod
+npm run seed:prod
+npm run deploy
+```
+
+The `:prod` commands modify the remote database. Local `.dev.vars` / `.env` values are not deployment configuration. Set the frontend's `EXPO_PUBLIC_API_URL` to the deployed HTTPS origin before bundling it.
 
 ## Seed study locations
 
