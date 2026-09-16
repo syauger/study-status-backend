@@ -11,10 +11,13 @@
     "fix": "ultracite fix",
     "migrate:dev": "drizzle-kit generate && wrangler d1 migrations apply DB --local",
     "migrate:prod": "drizzle-kit generate && wrangler d1 migrations apply DB --remote",
-    "start": "wrangler dev",
+    "seed:dev": "wrangler d1 execute DB --local --file scripts/seed-locations.sql",
+    "seed:prod": "wrangler d1 execute DB --remote --file scripts/seed-locations.sql",
+    "start": "wrangler dev --ip 0.0.0.0",
     "prepare": "husky"
   },
   "dependencies": {
+    "@better-auth/expo": "^1.7.5",
     "better-auth": "^1.7.5",
     "chanfana": "^3.3.0",
     "dotenv": "^17.4.2",
