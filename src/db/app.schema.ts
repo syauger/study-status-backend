@@ -2,15 +2,23 @@ import { relations } from "drizzle-orm";
 import { int, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 import { user } from "@/db/auth.schema";
+import type { LocationHours } from "@/lib/location";
+import { noiseLevels } from "@/lib/location";
 
 export const location = sqliteTable("locations", {
+  amenities: text().notNull().default(""),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
+  description: text().notNull().default(""),
+  hours: text({ mode: "json" }).$type<LocationHours>(),
   id: int().primaryKey({ autoIncrement: true }),
   latitude: real().notNull(),
   longitude: real().notNull(),
   name: text().notNull(),
+  noiseLevel: text("noise_level", { enum: noiseLevels })
+    .notNull()
+    .default("unknown"),
 });
 
 export const report = sqliteTable("checkins", {

@@ -22,6 +22,27 @@
       "when": 1789512228728,
       "tag": "0002_sloppy_rhino",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1789523135336,
+      "tag": "0003_awesome_doomsday",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1789523217804,
+      "tag": "0004_rename_amenities",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1789523423610,
+      "tag": "0005_location_hours_noise",
+      "breakpoints": true
     }
   ]
 }
