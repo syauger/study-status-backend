@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 
 import { locationsEndpoints } from "@/endpoints/locations";
+import { LocationWeather } from "@/endpoints/locations/weather";
 import { reportsEndpoints } from "@/endpoints/reports";
 import { auth } from "@/lib/auth";
 import { webOrigins } from "@/lib/origins";
@@ -39,6 +40,9 @@ app.use(
 );
 openapi.get("/api/locations", locationsEndpoints.list);
 openapi.get("/api/locations/:locationId", locationsEndpoints.get);
+openapi.get("/api/locations/:locationId/weather", LocationWeather);
+app.use("/location/*", cors({ origin: "*", allowMethods: ["GET", "OPTIONS"] }));
+openapi.get("/location/:locationId/weather", LocationWeather);
 
 openapi.get("/api/reports", reportsEndpoints.list);
 app.post(
