@@ -13,6 +13,8 @@
     "migrate:prod": "drizzle-kit generate && wrangler d1 migrations apply DB --remote",
     "seed:dev": "wrangler d1 execute DB --local --file scripts/seed-locations.sql",
     "seed:prod": "wrangler d1 execute DB --remote --file scripts/seed-locations.sql",
+    "seed:reports:dev": "wrangler d1 execute DB --local --file scripts/seed-reports.sql",
+    "seed:reports:prod": "wrangler d1 execute DB --remote --file scripts/seed-reports.sql",
     "start": "wrangler dev --ip 0.0.0.0",
     "prepare": "husky"
   },

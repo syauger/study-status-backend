@@ -160,6 +160,20 @@ Noise categories are editorial expectations, not measured sound levels or buildi
 
 These read-only endpoints are public and allow cross-origin GET requests for the Expo web client. They are registered before report authentication middleware.
 
+## Seed random reports
+
+After applying migrations and seeding locations, run:
+
+```sh
+npm run seed:reports:dev
+```
+
+`scripts/seed-reports.sql` creates 200 sample users and appends 1,000 reports per existing location (5,000 with the five default locations). Reports randomly select an author, crowd level, and matching comment, with some comments omitted. Timestamps are relative to execution time: 10% fall within the last hour, and the rest within the last seven days. Users are created with millisecond timestamps and reports with second timestamps to match their schemas.
+
+Reruns reuse the sample users and append another batch without deleting existing reports. Sample emails use `example.invalid`; these users have no login credentials or sessions. With no locations, the script creates the users but no reports. Change the `200` author count in both places, the `1000` report count, or the seven-day window in the SQL to customize the volume and recency.
+
+To explicitly seed the remote database, use `npm run seed:reports:prod` after its migrations and location seed. These commands use [Wrangler's D1 SQL file execution](https://developers.cloudflare.com/d1/wrangler-commands/#d1-execute).
+
 ## Reports and authentication
 
 Report reads are public. `GET /api/reports?locationId=1` returns up to 10 reports, newest first, plus `nextCursor`. Fetch older reports by passing `before=<nextCursor>` with the same location filter. `GET /api/reports/:reportId` returns one report. Public responses include the author's display name, not email or session data.
